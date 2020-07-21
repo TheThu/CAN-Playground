@@ -20,10 +20,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32f3xx.h"
+#include "stm32f303xe.h"
 
 /* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
+/* USER CODE BEGIN Includes *
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,10 +53,43 @@ UART_HandleTypeDef huart2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_CAN_Init(void);
+// static void MX_CAN_Init(void);
+void CAN_Init();
+
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
+void CAN_Init()
+{
+  hcan.Instance = CAN;
+  hcan.Init.Mode = CAN_MODE_LOOPBACK;
+  hcan.Init.AutoBusOff = DISABLE;
+  hcan.Init.AutoRetransmission = ENABLE;
+  hcan.Init.AutoWakeUp = DISABLE;
+  hcan.Init.ReceiveFifoLocked = DISABLE;
+  hcan.Init.TimeTriggerMode = DISABLE;
+  hcan.Init.TransmitFifoPriority = DISABLE;
+
+  /* time quanta configuration, CAN hangs on APB1-BUS, the maximum achievable APB1 Clk ofr HSE 8 MHz is 4 MHz, Can Bit time calculation: http://www.bittiming.can-wiki.info/
+   * */
+  // Bitrate up tp 250
+  hcan.Init.Prescaler = 1;
+  hcan.Init.TimeSeg1 =CAN_BS1_16TQ;
+  hcan.Init.TimeSeg2 =CAN_BS1_13TQ;
+  hcan.Init.SyncJumpWidth =CAN_SJW_2TQ;
+
+  if(HAL_CAN_Init(&hcan) != HAL_OK)
+  {
+	Error_Handler();
+  }
+
+
+
+
+
+
+
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -79,7 +113,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -91,7 +124,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_CAN_Init();
+ // MX_CAN_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
@@ -157,37 +190,37 @@ void SystemClock_Config(void)
   * @param None
   * @retval None
   */
-static void MX_CAN_Init(void)
-{
-
-  /* USER CODE BEGIN CAN_Init 0 */
-
-  /* USER CODE END CAN_Init 0 */
-
-  /* USER CODE BEGIN CAN_Init 1 */
-
-  /* USER CODE END CAN_Init 1 */
-  hcan.Instance = CAN;
-  hcan.Init.Prescaler = 16;
-  hcan.Init.Mode = CAN_MODE_NORMAL;
-  hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan.Init.TimeSeg1 = CAN_BS1_1TQ;
-  hcan.Init.TimeSeg2 = CAN_BS2_1TQ;
-  hcan.Init.TimeTriggeredMode = DISABLE;
-  hcan.Init.AutoBusOff = DISABLE;
-  hcan.Init.AutoWakeUp = DISABLE;
-  hcan.Init.AutoRetransmission = DISABLE;
-  hcan.Init.ReceiveFifoLocked = DISABLE;
-  hcan.Init.TransmitFifoPriority = DISABLE;
-  if (HAL_CAN_Init(&hcan) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN CAN_Init 2 */
-
-  /* USER CODE END CAN_Init 2 */
-
-}
+//static void MX_CAN_Init(void)
+//{
+//
+//  /* USER CODE BEGIN CAN_Init 0 */
+//
+//  /* USER CODE END CAN_Init 0 */
+//
+//  /* USER CODE BEGIN CAN_Init 1 */
+//
+//  /* USER CODE END CAN_Init 1 */
+//  hcan.Instance = CAN;
+//  hcan.Init.Prescaler = 16;
+//  hcan.Init.Mode = CAN_MODE_NORMAL;
+//  hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
+//  hcan.Init.TimeSeg1 = CAN_BS1_1TQ;
+//  hcan.Init.TimeSeg2 = CAN_BS2_1TQ;
+//  hcan.Init.TimeTriggeredMode = DISABLE;
+//  hcan.Init.AutoBusOff = DISABLE;
+//  hcan.Init.AutoWakeUp = DISABLE;
+//  hcan.Init.AutoRetransmission = DISABLE;
+//  hcan.Init.ReceiveFifoLocked = DISABLE;
+//  hcan.Init.TransmitFifoPriority = DISABLE;
+//  if (HAL_CAN_Init(&hcan) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
+//  /* USER CODE BEGIN CAN_Init 2 */
+//
+//  /* USER CODE END CAN_Init 2 */
+//
+//}
 
 /**
   * @brief USART2 Initialization Function
