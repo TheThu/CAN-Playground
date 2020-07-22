@@ -32,7 +32,7 @@ extern "C" {
   * @{
   */
 
-//#if defined (CAN)
+#if defined (CAN)
 /** @addtogroup CAN
   * @{
   */
@@ -836,7 +836,7 @@ HAL_StatusTypeDef HAL_CAN_ResetError(CAN_HandleTypeDef *hcan);
 }
 #endif
 
-//#endif /* STM32F3xx_HAL_CAN_H */
+#endif /* STM32F3xx_HAL_CAN_H */
 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

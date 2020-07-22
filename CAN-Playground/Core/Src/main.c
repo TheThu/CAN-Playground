@@ -20,11 +20,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stm32f3xx.h"
-#include "stm32f303xe.h"
 
 /* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes *
+/* USER CODE BEGIN Includes */
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,9 +52,7 @@ UART_HandleTypeDef huart2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-// static void MX_CAN_Init(void);
-void CAN_Init();
-
+//static void MX_CAN_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -67,7 +64,7 @@ void CAN_Init()
   hcan.Init.AutoRetransmission = ENABLE;
   hcan.Init.AutoWakeUp = DISABLE;
   hcan.Init.ReceiveFifoLocked = DISABLE;
-  hcan.Init.TimeTriggerMode = DISABLE;
+  hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.TransmitFifoPriority = DISABLE;
 
   /* time quanta configuration, CAN hangs on APB1-BUS, the maximum achievable APB1 Clk ofr HSE 8 MHz is 4 MHz, Can Bit time calculation: http://www.bittiming.can-wiki.info/
@@ -82,12 +79,6 @@ void CAN_Init()
   {
 	Error_Handler();
   }
-
-
-
-
-
-
 
 }
 /* USER CODE END PFP */
@@ -126,7 +117,9 @@ int main(void)
   MX_GPIO_Init();
  // MX_CAN_Init();
   MX_USART2_UART_Init();
+  CAN_Init();
   /* USER CODE BEGIN 2 */
+
 
   /* USER CODE END 2 */
 
@@ -153,13 +146,10 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
-  RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -168,12 +158,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
@@ -185,20 +175,19 @@ void SystemClock_Config(void)
   }
 }
 
-/**
-  * @brief CAN Initialization Function
-  * @param None
-  * @retval None
-  */
+///**
+//  * @brief CAN Initialization Function
+//  * @param None
+//  * @retval None
+//  */
 //static void MX_CAN_Init(void)
 //{
 //
 //  /* USER CODE BEGIN CAN_Init 0 */
-//
+////
 //  /* USER CODE END CAN_Init 0 */
-//
 //  /* USER CODE BEGIN CAN_Init 1 */
-//
+////
 //  /* USER CODE END CAN_Init 1 */
 //  hcan.Instance = CAN;
 //  hcan.Init.Prescaler = 16;
@@ -212,15 +201,36 @@ void SystemClock_Config(void)
 //  hcan.Init.AutoRetransmission = DISABLE;
 //  hcan.Init.ReceiveFifoLocked = DISABLE;
 //  hcan.Init.TransmitFifoPriority = DISABLE;
+//
 //  if (HAL_CAN_Init(&hcan) != HAL_OK)
 //  {
 //    Error_Handler();
 //  }
 //  /* USER CODE BEGIN CAN_Init 2 */
-//
+////
 //  /* USER CODE END CAN_Init 2 */
 //
 //}
+
+void CAN_Tx()
+{
+	CAN_TxHeaderTypeDef TxHeader;
+	uint32_t TxMailbox;
+	uint8_t message[5] = {'H', 'E', 'L', 'L','O'};
+	TxHeader.DLC = 5;
+	TxHeader.StdId = 0x65D;
+	TxHeader.RTR = CAN_RTR_DATA;
+
+	if(HAL_CAN_AddTxMessage(&hcan,&TxHeader, message, &TxMailbox) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	while(HAL_CAN_IsTxMessagePending(&hcan,TxMailbox));
+
+
+
+}
 
 /**
   * @brief USART2 Initialization Function
