@@ -215,7 +215,6 @@
 /** @addtogroup STM32F3xx_HAL_Driver
   * @{
   */
-
 #if defined(CAN)
 
 /** @defgroup CAN CAN

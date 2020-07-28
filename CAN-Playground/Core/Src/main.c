@@ -20,6 +20,12 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32f3xx_hal_rcc.h"
+#include "stm32f3xx_hal_def.h"
+#include "stm32f3xx_hal.h"
+#include "string.h"
+#include <stdio.h>
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -55,6 +61,7 @@ static void MX_GPIO_Init(void);
 //static void MX_CAN_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
+void CAN_Tx();
 
 void CAN_Init()
 {
@@ -118,6 +125,7 @@ int main(void)
  // MX_CAN_Init();
   MX_USART2_UART_Init();
   CAN_Init();
+  CAN_Tx();
   /* USER CODE BEGIN 2 */
 
 
@@ -214,6 +222,8 @@ void SystemClock_Config(void)
 
 void CAN_Tx()
 {
+
+	char msg[50];
 	CAN_TxHeaderTypeDef TxHeader;
 	uint32_t TxMailbox;
 	uint8_t message[5] = {'H', 'E', 'L', 'L','O'};
@@ -227,8 +237,8 @@ void CAN_Tx()
 	}
 
 	while(HAL_CAN_IsTxMessagePending(&hcan,TxMailbox));
-
-
+	sprintf(msg,"message Transmitted");
+	HAL_UART_Transmit(&huart2, (uint8_t*)msg,strlen(msg) , HAL_MAX_DELAY);
 
 }
 
