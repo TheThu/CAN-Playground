@@ -58,6 +58,7 @@ static void MX_USART2_UART_Init(void);
 static void MX_CAN_Init(void);
 void CAN1_Tx(void);
 void CAN1_Rx(void);
+void CAN_Filter_Config(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -97,6 +98,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_CAN_Init();
+  CAN_Filter_Config();
   if( HAL_CAN_Start(&hcan) != HAL_OK)
   	{
   		Error_Handler();
@@ -104,6 +106,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   CAN1_Tx();
+  CAN1_Rx();
 
   /* USER CODE END 2 */
 
@@ -184,7 +187,7 @@ void CAN1_Tx(void)
 		Error_Handler();
 	}
 
-	while( HAL_CAN_IsTxMessagePending(&hcan,TxMailbox));
+	while(HAL_CAN_IsTxMessagePending(&hcan,TxMailbox));
 
 	sprintf(msg,"Message Transmitted\r\n");
 	HAL_UART_Transmit(&huart2,(uint8_t*)msg,strlen(msg),HAL_MAX_DELAY);
@@ -269,19 +272,44 @@ static void MX_USART2_UART_Init(void)
 }
 
 
-void CAN1_Rx(void)
+void CAN_Filter_Config(void)
 {
-	CAN_RxHeaderTypeDef RxHeader;
-	uint8_t rcv_msg[5];
+	CAN_FilterTypeDef can_filter_init;
+	can_filter_init.FilterActivation = ENABLE;
+	can_filter_init.FilterBank = 0;
+	can_filter_init.FilterFIFOAssignment = CAN_RX_FIFO0;
+	can_filter_init.FilterIdHigh = 0x0000;
+	can_filter_init.FilterIdLow = 0x0000;
+	can_filter_init.FilterMaskIdHigh = 0x0000;
+	can_filter_init.FilterMaskIdLow = 0x0000;
+	can_filter_init.FilterMode = CAN_FILTERMODE_IDMASK;
+	can_filter_init.FilterScale = CAN_FILTERSCALE_32BIT;
 
-	// Check if at least one message is in the RX FIFO
-	while(HAL_CAN_GetRxFifoFillLevel(&hcan, CAN_RX_FIFO0));
-
-
-	if(HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, RXHeader, rcv_msg))
+	if(HAL_CAN_ConfigFilter(&hcan, &can_filter_init) != HAL_OK)
 	{
 		Error_Handler();
 	}
+
+}
+
+void CAN1_Rx(void)
+{
+	CAN_RxHeaderTypeDef RxHeader;
+	uint8_t rcvd_msg[5];
+	char msg[50];
+
+	// Check if at least one message is in the RX FIFO
+	while(! HAL_CAN_GetRxFifoFillLevel(&hcan, CAN_RX_FIFO0));
+
+
+	if(HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0,&RxHeader, rcvd_msg) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sprintf(msg,"Message Received : %s\r\n",rcvd_msg);
+	HAL_UART_Transmit(&huart2,(uint8_t*)msg,strlen(msg),HAL_MAX_DELAY);
+
 }
 
 
