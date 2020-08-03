@@ -126,6 +126,7 @@ int main(void)
   MX_USART2_UART_Init();
   CAN_Init();
   CAN_Tx();
+
   /* USER CODE BEGIN 2 */
 
 

@@ -57,6 +57,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_CAN_Init(void);
 void CAN1_Tx(void);
+void CAN1_Rx(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -101,6 +102,7 @@ int main(void)
   		Error_Handler();
   	}
   /* USER CODE BEGIN 2 */
+
   CAN1_Tx();
 
   /* USER CODE END 2 */
@@ -160,7 +162,7 @@ void SystemClock_Config(void)
   }
 }
 
-
+// Transmitting in loopback mode
 
 void CAN1_Tx(void)
 {
@@ -194,6 +196,7 @@ void CAN1_Tx(void)
   * @param None
   * @retval None
   */
+
 static void MX_CAN_Init(void)
 {
 
@@ -205,11 +208,15 @@ static void MX_CAN_Init(void)
 //
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN;
-  hcan.Init.Prescaler = 9;
   hcan.Init.Mode = CAN_MODE_LOOPBACK;
+
+  // Transmission with 200kBits/s
+  hcan.Init.Prescaler = 9;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
   hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
+
+
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = DISABLE;
   hcan.Init.AutoWakeUp = DISABLE;
@@ -260,6 +267,29 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE END USART2_Init 2 */
 
 }
+
+
+void CAN1_Rx(void)
+{
+	CAN_RxHeaderTypeDef RxHeader;
+	uint8_t rcv_msg[5];
+
+	// Check if at least one message is in the RX FIFO
+	while(HAL_CAN_GetRxFifoFillLevel(&hcan, CAN_RX_FIFO0));
+
+
+	if(HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, RXHeader, rcv_msg))
+	{
+		Error_Handler();
+	}
+}
+
+
+
+
+
+
+
 
 /**
   * @brief GPIO Initialization Function
