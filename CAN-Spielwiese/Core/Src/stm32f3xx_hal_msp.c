@@ -110,6 +110,19 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
 
   /* USER CODE BEGIN CAN_MspInit 1 */
 
+    // Interrupt priorities
+    HAL_NVIC_SetPriority(CAN_TX_IRQn, 15, 0);
+    HAL_NVIC_SetPriority(CAN_RX0_IRQn, 15, 0);
+    HAL_NVIC_SetPriority(CAN_RX1_IRQn, 15, 0);
+    HAL_NVIC_SetPriority(CAN_SCE_IRQn, 15, 0);
+
+    // Enable Interupt for CAN_TX and CAN_TX
+    HAL_NVIC_EnableIRQ(CAN_TX_IRQn);
+    HAL_NVIC_EnableIRQ(CAN_RX0_IRQn);
+    HAL_NVIC_EnableIRQ(CAN_RX1_IRQn);
+    HAL_NVIC_EnableIRQ(CAN_SCE_IRQn);
+
+
   /* USER CODE END CAN_MspInit 1 */
   }
 
