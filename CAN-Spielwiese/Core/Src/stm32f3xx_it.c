@@ -24,7 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
-extern hcan;
+extern CAN_HandleTypeDef hcan;
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -192,11 +192,11 @@ void SysTick_Handler(void)
 
 void USB_HP_CAN_TX_IRQHandler()
 {
-	HAL_CAN_IRQHandler(hcan);
+	HAL_CAN_IRQHandler(&hcan);
 }
 void USB_LP_CAN_RX0_IRQHandler()
 {
-	HAL_CAN_IRQHandler(hcan);
+	HAL_CAN_IRQHandler(&hcan);
 }
 
 void CAN_RX1_IRQHandler()
@@ -206,7 +206,7 @@ void CAN_RX1_IRQHandler()
 
 void CAN_SCE_IRQHandler()
 {
-	HAL_CAN_IRQHandler(hcan);
+	HAL_CAN_IRQHandler(&hcan);
 }
 
 /******************************************************************************/
